@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "jqueryui@1.14.1",
+      "destination": "wwwroot/lib/jqueryui/"
+    },
+    {
+      "library": "font-awesome@6.7.2",
+      "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "library": "toastr.js@2.1.4",
+      "destination": "wwwroot/lib/toastr.js/"
+    },
+    {
+      "library": "bootbox.js@6.0.4",
+      "destination": "wwwroot/lib/bootbox.js/"
+    },
+    {
+      "library": "datatables@1.10.21",
+      "destination": "wwwroot/lib/datatables/"
+    }
+  ]
+}
