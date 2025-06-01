@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SMSAppv2.CommandQueries;
+using SMSAppv2.Data;
+using SMSAppv2.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SMSAppv2.Data;
-using SMSAppv2.Models;
 
 namespace SMSAppv2.APIs
 {
@@ -26,42 +27,75 @@ namespace SMSAppv2.APIs
         public async Task<ActionResult<IEnumerable<Departments>>> GetHistory()
         {
             return await _context.Departments
+                .Where(c => !c.isDeleted)
                 .OrderByDescending(c => c.Id)
                 .Take(3)
                 .ToListAsync();
         }
         // GET: api/Departments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Departments>>> GetDepartments()
+        public async Task<ActionResult<IEnumerable<DepartmentQuery>>> GetDepartments()
         {
-            return await _context.Departments.ToListAsync();
+            var entities = await _context.Departments
+                .Where(c=>!c.isDeleted)
+                .ToListAsync();
+            var result= new List<DepartmentQuery>();
+            foreach (var entity in entities)
+            {
+                var r = new DepartmentQuery()
+                {
+                    Id = entity.Id,
+                    Name = entity.Name,
+                    Code = entity.Code,
+                    Short_name = entity.Short_name,
+                };
+                result.Add(r);
+            }
+            return result;
         }
 
         // GET: api/Departments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Departments>> GetDepartments(int id)
+        public async Task<ActionResult<DepartmentQuery>> GetDepartments(int id)
         {
-            var departments = await _context.Departments.FindAsync(id);
+            
+            var entity = await _context.Departments.FindAsync(id);
 
-            if (departments == null)
+            if (entity == null)
             {
                 return NotFound();
             }
+            var result = new DepartmentQuery()
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Code = entity.Code,
+                Short_name = entity.Short_name
 
-            return departments;
+            };
+
+            return result;
         }
 
         // PUT: api/Departments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDepartments(int id, Departments departments)
+        public async Task<IActionResult> PutDepartments(int id, DepartmentCommand command)
         {
-            if (id != departments.Id)
+            if (id != command.Id)
             {
                 return BadRequest();
             }
+            var entity = new Departments()
+            {
+                Id=command.Id,
+                Name=command.Name,
+                Code = command.Code,
+                Short_name = command.Short_name,
+                editedAt=DateTime.Now
+            };
 
-            _context.Entry(departments).State = EntityState.Modified;
+            _context.Entry(entity).State = EntityState.Modified;
 
             try
             {
@@ -85,25 +119,34 @@ namespace SMSAppv2.APIs
         // POST: api/Departments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Departments>> PostDepartments(Departments departments)
+        public async Task<ActionResult<Departments>> PostDepartments(DepartmentCommand command)
         {
-            _context.Departments.Add(departments);
+            var entity = new Departments()
+            {
+                Id= command.Id,
+                Name= command.Name,
+                Code= command.Code,
+                Short_name= command.Short_name,
+                createdAt= DateTime.Now
+            };
+            _context.Departments.Add(entity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDepartments", new { id = departments.Id }, departments);
+            return Ok(entity.Id);
         }
 
         // DELETE: api/Departments/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartments(int id)
         {
-            var departments = await _context.Departments.FindAsync(id);
-            if (departments == null)
+            var entity = await _context.Departments.FindAsync(id);
+            if (entity == null)
             {
                 return NotFound();
             }
 
-            _context.Departments.Remove(departments);
+            entity.isDeleted = true;
+            entity.deletedAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
             return NoContent();

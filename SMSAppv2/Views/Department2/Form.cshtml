@@ -1,4 +1,4 @@
-﻿@model SMSAppv2.Models.Departments
+﻿@model SMSAppv2.CommandQueries.DepartmentCommand
 @{
     ViewData["Title"] = "Form";
 }
@@ -31,11 +31,11 @@
                                     <input asp-for="Code" class="form-control" />
                                     <span asp-validation-for="Code" class="text-danger"></span>
                                 </div>
-                                <div class="form-group">
+                                @* <div class="form-group">
                                     <label asp-for="createdAt" class="control-label"></label>
                                     <input asp-for="createdAt" class="form-control" />
                                     <span asp-validation-for="createdAt" class="text-danger"></span>
-                                </div>
+                                </div> *@
                                 <div class="form-group">
                                     <a class="btn btn-success" id="btnrefresh">Refresh</a>
                                     <input type="button" id="btnSubmit" value="Submit" class="btn btn-primary" />
